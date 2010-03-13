@@ -7,7 +7,7 @@ if [ "$#" != "1" ]; then
 	exit 2
 fi
 
-PYINST=https://src.develer.com/svnoss/pyinstaller
+PYINST=http://svn.pyinstaller.org
 WORKDIR="/tmp/release-pyinstaller.$$/"
 DESTDIR=trinity.develer.com:/var/www/html/pyinstaller
 TAG=$1
