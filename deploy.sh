@@ -7,10 +7,13 @@ if [ "$#" != "1" ]; then
 	exit 2
 fi
 
-PYINST=http://svn.pyinstaller.org
-WORKDIR="/tmp/release-pyinstaller.$$/"
-DESTDIR=trinity.develer.com:/var/www/html/pyinstaller
 TAG=$1
+
+## clone from local git clone, not from github
+#PYINST=git://github.com/pyinstaller/pyinstaller.git
+PYINST=$PWD
+
+WORKDIR="/tmp/release-pyinstaller.$$/"
 
 abort()
 {
@@ -22,16 +25,22 @@ abort()
 
 mkdir $WORKDIR
 cd $WORKDIR
-svn export $PYINST/tags/$TAG pyinstaller-$TAG 1>/dev/null || abort
+git clone $PYINST pyinstaller-$TAG || abort
 cd pyinstaller-$TAG
-if [ ! doc/Manual.pdf -nt doc/source/Manual.rst -o ! doc/Manual.html -nt doc/source/Manual.rst ]; then
-	echo "Documentation was not rebuilt, aborting"
-	abort
-fi;
+git checkout --quiet v$TAG
+
+# checking for timestamps does not work
+#cd doc
+#if [ ! Manual.pdf -nt source/Manual.rst -o ! Manual.html -nt source/Manual.rst ]; then
+#	echo "Documentation was not rebuilt, aborting"
+#	abort
+#fi
+#cd ..
+
+rm -rf .git .gitignore .gitattributes
 cd ..
-mkdir $TAG
-tar cjf $TAG/pyinstaller-$TAG.tar.bz2 pyinstaller-$TAG/ 1>/dev/null
-zip -9r $TAG/pyinstaller-$TAG.zip pyinstaller-$TAG/ 1>/dev/null
-md5sum $TAG/* > $TAG/MD5SUMS.txt
-scp -r $TAG $DESTDIR/source || abort
-rm -rf $WORKDIR
+
+tar cjf pyinstaller-$TAG.tar.bz2 pyinstaller-$TAG/ 1>/dev/null
+zip -9r pyinstaller-$TAG.zip pyinstaller-$TAG/ 1>/dev/null
+md5sum pyinstaller-$TAG.* > MD5SUMS.txt
+echo "Now upload files in $WORKDIR to github".
